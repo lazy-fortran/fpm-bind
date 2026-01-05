@@ -35,14 +35,28 @@ cd your-fortran-project
 fpm bind python
 ```
 
-This generates Python bindings in `build/bind/python/`.
+This generates Python bindings in `build/bind/python/`:
+- `f90wrap_*.f90` - Fortran wrapper modules
+- `_<module>.c` - C extension (direct-c mode)
+- `<module>.py` - Python wrapper
+- `pyproject.toml` - Package metadata
 
-### 3. Build and install (optional)
+### 3. Build and install the Python package
 
+First, build your Fortran library:
 ```bash
-fpm bind python --build    # Compile the extension
-fpm bind python --install  # pip install -e
+fpm build --profile release
 ```
+
+Then compile and install the Python extension:
+```bash
+cd build/bind/python
+pip install -e .
+```
+
+Note: For direct-c mode, you may need to compile the C extension manually
+or add a `setup.py` with extension configuration. See f90wrap documentation
+for details on building extensions.
 
 ## Configuration
 
