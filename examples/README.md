@@ -6,7 +6,7 @@ Each subdirectory is a standalone fpm project demonstrating fpm-bind usage.
 
 ```bash
 cd simple
-fpm-bind python
+fpm bind python
 ls build/bind/python/
 ```
 

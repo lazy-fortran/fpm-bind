@@ -32,7 +32,7 @@ package-name = "mypackage"
 
 ```bash
 cd your-fortran-project
-fpm-bind python
+fpm bind python
 ```
 
 This generates Python bindings in `build/bind/python/`.
@@ -40,8 +40,8 @@ This generates Python bindings in `build/bind/python/`.
 ### 3. Build and install (optional)
 
 ```bash
-fpm-bind python --build    # Compile the extension
-fpm-bind python --install  # pip install -e
+fpm bind python --build    # Compile the extension
+fpm bind python --install  # pip install -e
 ```
 
 ## Configuration
@@ -67,7 +67,7 @@ See `examples/` for complete demo projects:
 
 ```bash
 cd examples/simple
-fpm-bind python
+fpm bind python
 ```
 
 ## How it works
