@@ -21,7 +21,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install f90wrap
-        run: pip install f90wrap
+        run: pip install git+https://github.com/itpplasma/f90wrap@fix/directc-prototype-mod-name
 
       - name: Build and install fpm-bind
         run: fpm install --prefix ~/.local
@@ -57,7 +57,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install f90wrap
-        run: pip install f90wrap
+        run: pip install git+https://github.com/itpplasma/f90wrap@fix/directc-prototype-mod-name
 
       - name: Build and install fpm-bind
         run: fpm install --prefix ~/.local
