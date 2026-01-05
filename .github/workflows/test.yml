@@ -16,12 +16,23 @@ jobs:
         with:
           fpm-version: 'v0.10.1'
 
-      - name: Build
-        run: fpm build
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
 
-      - name: Test examples parse
+      - name: Install f90wrap
+        run: pip install f90wrap
+
+      - name: Build and install fpm-bind
+        run: fpm install --prefix ~/.local
+
+      - name: Test fpm-bind on examples
         run: |
+          export PATH="$HOME/.local/bin:$PATH"
           for dir in examples/*/; do
-            echo "Checking $dir"
-            fpm build --manifest-path "$dir/fpm.toml"
+            echo "=== Testing $dir ==="
+            cd "$dir"
+            fpm-bind python
+            ls -la build/bind/python/
+            cd ../..
           done
