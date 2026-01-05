@@ -36,3 +36,42 @@ jobs:
             ls -la build/bind/python/
             cd ../..
           done
+
+  thirdparty:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - repo: lazy-fortran/fortplot
+            branch: feature/fpm-bind
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: fortran-lang/setup-fpm@v5
+        with:
+          fpm-version: 'v0.10.1'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install f90wrap
+        run: pip install f90wrap
+
+      - name: Build and install fpm-bind
+        run: fpm install --prefix ~/.local
+
+      - name: Checkout ${{ matrix.repo }}
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ matrix.repo }}
+          ref: ${{ matrix.branch }}
+          path: thirdparty-test
+
+      - name: Test fpm bind on ${{ matrix.repo }}
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          cd thirdparty-test
+          fpm bind python
+          ls -la build/bind/python/
