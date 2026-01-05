@@ -1,0 +1,27 @@
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: fortran-lang/setup-fpm@v5
+        with:
+          fpm-version: 'v0.10.1'
+
+      - name: Build
+        run: fpm build
+
+      - name: Test examples parse
+        run: |
+          for dir in examples/*/; do
+            echo "Checking $dir"
+            fpm build --manifest-path "$dir/fpm.toml"
+          done

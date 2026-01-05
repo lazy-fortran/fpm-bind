@@ -57,6 +57,19 @@ kind-map = "kind_map.json"    # Custom kind mapping file
 output-dir = "build/python"   # Output directory
 ```
 
+## Examples
+
+See `examples/` for complete demo projects:
+
+- `simple/` - basic functions and subroutines
+- `arrays/` - array operations
+- `derived_types/` - derived types with methods
+
+```bash
+cd examples/simple
+fpm-bind python
+```
+
 ## How it works
 
 fpm-bind uses f90wrap to parse Fortran source files and generate:
