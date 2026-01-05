@@ -29,7 +29,7 @@ jobs:
       - name: Test fpm bind on examples
         run: |
           export PATH="$HOME/.local/bin:$PATH"
-          for dir in examples/*/; do
+          for dir in example/*/; do
             echo "=== Testing $dir ==="
             cd "$dir"
             fpm bind python

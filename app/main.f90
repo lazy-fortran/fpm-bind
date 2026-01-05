@@ -74,18 +74,10 @@ program fpm_bind_main
             stop 1
         end if
 
-        call generate_python_bindings(project, bind_cfg, error)
+        call generate_python_bindings(project, bind_cfg, do_build .or. do_install, error)
         if (allocated(error)) then
             write(stderr, '(A)') "Error: " // error
             stop 1
-        end if
-
-        if (do_build .or. do_install) then
-            call build_python_bindings(project, bind_cfg, error)
-            if (allocated(error)) then
-                write(stderr, '(A)') "Error: " // error
-                stop 1
-            end if
         end if
 
         if (do_install) then
