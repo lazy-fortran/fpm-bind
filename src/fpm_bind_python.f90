@@ -8,15 +8,16 @@ module fpm_bind_python
 
 contains
 
-    subroutine generate_python_bindings(project, bind_cfg, error)
+    subroutine generate_python_bindings(project, bind_cfg, do_build, error)
         type(project_config_t), intent(in) :: project
         type(bind_config_t), intent(in) :: bind_cfg
+        logical, intent(in) :: do_build
         character(len=:), allocatable, intent(out) :: error
 
         character(len=:), allocatable :: package_name, module_name, output_dir
         character(len=256), allocatable :: source_files(:)
         character(len=4096) :: cmd
-        character(len=512) :: files_list_path
+        character(len=512) :: files_list_path, kind_map_path
         integer :: n_files, i, exit_status, unit_num, ios
 
         if (allocated(bind_cfg%python%package_name)) then
@@ -57,6 +58,15 @@ contains
             return
         end if
 
+        ! Generate default kind map for iso_fortran_env kinds
+        if (.not. allocated(bind_cfg%python%kind_map)) then
+            kind_map_path = trim(output_dir) // "/kind_map"
+            call generate_default_kind_map(kind_map_path, error)
+            if (allocated(error)) return
+        else
+            kind_map_path = trim(project%project_dir) // "/" // trim(bind_cfg%python%kind_map)
+        end if
+
         write(unit_num, '(A)') "#!/bin/bash"
         write(unit_num, '(A)') "cd " // output_dir
         write(unit_num, '(A)', advance='no') "f90wrap -m " // trim(module_name)
@@ -65,10 +75,11 @@ contains
             write(unit_num, '(A)', advance='no') " --direct-c"
         end if
 
-        if (allocated(bind_cfg%python%kind_map)) then
-            write(unit_num, '(A)', advance='no') " -k " // trim(project%project_dir) // &
-                  "/" // trim(bind_cfg%python%kind_map)
+        if (do_build) then
+            write(unit_num, '(A)', advance='no') " --build"
         end if
+
+        write(unit_num, '(A)', advance='no') " -k " // trim(kind_map_path)
 
         write(unit_num, '(A)') " \"
 
@@ -92,11 +103,13 @@ contains
             return
         end if
 
-        call generate_pyproject_toml(project, bind_cfg, output_dir, package_name, error)
-        if (allocated(error)) return
+        if (.not. do_build) then
+            call generate_pyproject_toml(project, bind_cfg, output_dir, package_name, error)
+            if (allocated(error)) return
 
-        call generate_init_py(output_dir, package_name, module_name, error)
-        if (allocated(error)) return
+            call generate_init_py(output_dir, package_name, module_name, error)
+            if (allocated(error)) return
+        end if
 
         write(stderr, '(A)') "Python bindings generated in " // output_dir
     end subroutine generate_python_bindings
@@ -160,6 +173,35 @@ contains
 
         close(unit_num)
     end subroutine generate_init_py
+
+    subroutine generate_default_kind_map(filepath, error)
+        character(len=*), intent(in) :: filepath
+        character(len=:), allocatable, intent(out) :: error
+
+        integer :: unit_num, ios
+
+        open(newunit=unit_num, file=trim(filepath), status='replace', &
+             action='write', iostat=ios)
+        if (ios /= 0) then
+            error = "Cannot create kind_map file"
+            return
+        end if
+
+        ! Default kind map for iso_fortran_env kinds
+        write(unit_num, '(A)') "{"
+        write(unit_num, '(A)') "  'real': {"
+        write(unit_num, '(A)') "    'dp': 'double',"
+        write(unit_num, '(A)') "    'real64': 'double',"
+        write(unit_num, '(A)') "    'real32': 'float'"
+        write(unit_num, '(A)') "  },"
+        write(unit_num, '(A)') "  'integer': {"
+        write(unit_num, '(A)') "    'int32': 'int',"
+        write(unit_num, '(A)') "    'int64': 'long_long'"
+        write(unit_num, '(A)') "  }"
+        write(unit_num, '(A)') "}"
+
+        close(unit_num)
+    end subroutine generate_default_kind_map
 
     subroutine build_python_bindings(project, bind_cfg, error)
         type(project_config_t), intent(in) :: project

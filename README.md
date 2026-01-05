@@ -28,35 +28,30 @@ Create `bind.toml` next to your `fpm.toml`:
 package-name = "mypackage"
 ```
 
-### 2. Generate bindings
+### 2. Generate and build bindings
 
 ```bash
 cd your-fortran-project
-fpm bind python
+fpm bind python --build
 ```
 
-This generates Python bindings in `build/bind/python/`:
-- `f90wrap_*.f90` - Fortran wrapper modules
-- `_<module>.c` - C extension (direct-c mode)
-- `<module>.py` - Python wrapper
-- `pyproject.toml` - Package metadata
+This generates and compiles Python bindings in `build/bind/python/`:
+- `_<module>.so` - Compiled Python extension
+- `<module>.py` - Python wrapper module
 
-### 3. Build and install the Python package
+### 3. Use the bindings
 
-First, build your Fortran library:
+```python
+import sys
+sys.path.insert(0, 'build/bind/python')
+import mypackage
+mypackage.mypackage.some_function()
+```
+
+Or generate only (without building):
 ```bash
-fpm build --profile release
+fpm bind python  # Generate wrappers only
 ```
-
-Then compile and install the Python extension:
-```bash
-cd build/bind/python
-pip install -e .
-```
-
-Note: For direct-c mode, you may need to compile the C extension manually
-or add a `setup.py` with extension configuration. See f90wrap documentation
-for details on building extensions.
 
 ## Configuration
 
@@ -80,8 +75,11 @@ See `examples/` for complete demo projects:
 - `derived_types/` - derived types with methods
 
 ```bash
-cd examples/simple
-fpm bind python
+cd examples/arrays
+fpm bind python --build
+cd build/bind/python
+python -c "import arrays; print(arrays.arrays.dot_product_vec([1,2,3], [4,5,6], 3))"
+# Output: 32.0
 ```
 
 ## How it works
