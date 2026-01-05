@@ -68,14 +68,14 @@ output-dir = "build/python"   # Output directory
 
 ## Examples
 
-See `examples/` for complete demo projects:
+See `example/` for complete demo projects:
 
 - `simple/` - basic functions and subroutines
 - `arrays/` - array operations
 - `derived_types/` - derived types with methods
 
 ```bash
-cd examples/arrays
+cd example/arrays
 fpm bind python --build
 cd build/bind/python
 python -c "import arrays; print(arrays.arrays.dot_product_vec([1,2,3], [4,5,6], 3))"
