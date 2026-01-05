@@ -1,6 +1,7 @@
 module fpm_bind_python
     use, intrinsic :: iso_fortran_env, only: stderr => error_unit
-    use fpm_bind_config, only: project_config_t, bind_config_t, find_source_files
+    use fpm_bind_config, only: project_config_t, bind_config_t, python_config_t, &
+                                find_source_files, filter_source_files
     implicit none
     private
 
@@ -15,10 +16,10 @@ contains
         character(len=:), allocatable, intent(out) :: error
 
         character(len=:), allocatable :: package_name, module_name, output_dir
-        character(len=256), allocatable :: source_files(:)
+        character(len=256), allocatable :: source_files(:), filtered_files(:)
         character(len=4096) :: cmd
         character(len=512) :: files_list_path, kind_map_path
-        integer :: n_files, i, exit_status, unit_num, ios
+        integer :: n_files, n_filtered, i, exit_status, unit_num, ios
 
         if (allocated(bind_cfg%python%package_name)) then
             package_name = bind_cfg%python%package_name
@@ -49,6 +50,20 @@ contains
         end if
 
         write(stderr, '(A,I0,A)') "Found ", n_files, " source files"
+
+        if (bind_cfg%python%n_include > 0 .or. bind_cfg%python%n_exclude > 0) then
+            call filter_source_files(source_files, n_files, bind_cfg%python, &
+                                     project%project_dir, filtered_files, n_filtered)
+            if (n_filtered == 0) then
+                error = "No source files after applying include/exclude filters"
+                return
+            end if
+            write(stderr, '(A,I0,A)') "After filtering: ", n_filtered, " source files"
+            deallocate(source_files)
+            allocate(source_files(n_filtered))
+            source_files = filtered_files
+            n_files = n_filtered
+        end if
 
         files_list_path = trim(output_dir) // "/run_f90wrap.sh"
         open(newunit=unit_num, file=trim(files_list_path), status='replace', &
