@@ -26,13 +26,13 @@ jobs:
       - name: Build and install fpm-bind
         run: fpm install --prefix ~/.local
 
-      - name: Test fpm-bind on examples
+      - name: Test fpm bind on examples
         run: |
           export PATH="$HOME/.local/bin:$PATH"
           for dir in examples/*/; do
             echo "=== Testing $dir ==="
             cd "$dir"
-            fpm-bind python
+            fpm bind python
             ls -la build/bind/python/
             cd ../..
           done
