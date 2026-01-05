@@ -1,0 +1,16 @@
+name = "fpm-bind"
+version = "0.1.0"
+license = "MIT"
+author = "lazy-fortran"
+description = "FPM plugin for language bindings - Python via f90wrap"
+
+[build]
+auto-executables = true
+
+[dependencies]
+toml-f = { git = "https://github.com/toml-f/toml-f" }
+
+[[executable]]
+name = "fpm-bind"
+source-dir = "app"
+main = "main.f90"
