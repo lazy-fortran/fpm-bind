@@ -51,7 +51,7 @@ jobs:
       matrix:
         include:
           - repo: lazy-fortran/fortplot
-            branch: feature/fpm-bind
+            branch: main
     steps:
       - uses: actions/checkout@v4
 
@@ -80,6 +80,11 @@ jobs:
         run: |
           export PATH="$HOME/.local/bin:$PATH"
           cd thirdparty-test
+          # The consumer configuration belongs to this integration test.
+          cat > bind.toml <<'TOML'
+          [python]
+          package-name = "fortplot"
+          TOML
           fpm bind python
           ls -la build/bind/python/
 
